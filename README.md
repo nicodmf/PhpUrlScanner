@@ -30,7 +30,7 @@ php scanner.php http://silex.sensiolabs.org/
 Use with php code
 -----------------
 
-Three statics methods provides the scan process :
+Three statics methods provide the scan process :
 ```php
 <?php
  Scanner::collect_and_return($url, $test_externals, $with_subpath, $with_sub_domain, $max_depth)
