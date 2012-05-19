@@ -6,7 +6,7 @@ Use
 
 The system require goutte in the same folder (https://github.com/fabpot/Goutte.git)
 
-The class can be simply use be type in the command line :
+The class can be simply use by typing in the command line :
 
 ```
 php scanner 'url' [ [url2] [url2] ... [url3] ]
