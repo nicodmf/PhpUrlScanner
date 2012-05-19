@@ -44,7 +44,7 @@ The serialized file contains the "Resources" object created in the scan process.
 
 Internal
 --------
-The scan is a loop which crawle html files, identify links (for now just links in an anchor tag), analysed and sorted those: external links will analized by simple curls request, internals resources crawle by Goutte.
+The scan is a loop which crawle html files, identify links (for now just links in an anchor tag), analyses and sorts those: external links will analized by simple curls request, internals resources crawle by Goutte.
 
 Futur
 -----
