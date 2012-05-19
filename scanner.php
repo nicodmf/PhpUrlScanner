@@ -504,15 +504,15 @@ class Scanner{
 		$res = "#\n";
 		$res.= "# $count_documents documents et $count_links links\n";
 		$res.= "#\n";
-		$res.= "#  --------------------------------------- \n";
-		$res.= "# |      Code     | Documents |     Links |\n";
-		$res.= "#  --------------------------------------- \n";
+		$res.= "#  ----------------------------------------- \n";
+		$res.= "# |       Code      | Documents |     Links |\n";
+		$res.= "#  ----------------------------------------- \n";
 		foreach($counts as $status=>$count){
-			$res.= sprintf("# | %-13s | %9s | %9s |\n",
+			$res.= sprintf("# | %-15s | %9s | %9s |\n",
 				$status,
 				isset($count['documents']) ? $count['documents'] : "",
 				isset($count['links']) ? $count['links'] : "");
-			$res.= "#  ---------------------------------------\n";
+			$res.= "#  -----------------------------------------\n";
 		}
 		LogDebug::add("$res#");
 		return $res;
@@ -595,7 +595,8 @@ class Scanner{
 			}
 		}catch(\Exception $e){
 			//print_r($e);
-			$resource->setStatus($e->getMessage());		
+			$resource->setStatus('GoutteException');//$e->getMessage());	
+			LogDebug::add("GoutteException Request ".$resource->getUrl());	
 		}
 	}
 	
@@ -612,8 +613,8 @@ class Scanner{
 		$crawler = $client->request('GET', $referer->getUrl());
 		$statut = $client->getResponse()->getStatus();
 		$referer->setStatus($statut);
-		$resource->analysed = true;
-		LogDebug::add("Request ".$referer->getUrl()." status: $statut");
+		$referer->analysed = true;
+		LogDebug::add($statut." Request ".$referer->getUrl());
 		$referer->isDocument = true;
 		foreach($crawler->filter('a')->extract(array('href')) as $link){
 			LogDebug::add("Href: $link", "is_valid");
@@ -653,9 +654,9 @@ class Scanner{
 
 		foreach($this->externals as $k=>$resource){
 			$status = curl_getinfo($ch[$k], CURLINFO_HTTP_CODE);
-			LogDebug::add("  -Link ".$resource->getUrl().":  $status");
+			LogDebug::add($status . " ---Link ".$resource->getUrl());
 			if($status!=200){
-				LogDebug::add(curl_getinfo($ch[$k]));
+				LogDebug::add(curl_getinfo($ch[$k]), "curl");
 			}
 			LogDebug::add(curl_getinfo($ch[$k]), "curl");
 			$resource->setStatus($status);
@@ -667,7 +668,7 @@ class Scanner{
 	}
 }
 
-if(isset($argc) && $_SERVER['SCRIPT_FILENAME']==__FILE__ && getcwd()==__DIR__){
+if(isset($argc) && getcwd()==__DIR__){
 	if($argc==2){
 		Scanner::collect_and_return($argv[1]);
 	}
