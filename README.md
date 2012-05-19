@@ -1,4 +1,5 @@
-A set of class which create a command line utility which scans a entire site, a sub folder of a site or set of given url.
+A set of class which create a command line utility which scans a entire site, a sub folder of a site or set of given urls.
+The library is design to be simple and speed. Analysed of silex take by example 4 seconds for 150 urls (68 crawled resources and 82 curled links).
 
 Use
 ---
@@ -29,12 +30,15 @@ php scanner.php http://silex.sensiolabs.org/
 Use with php code
 -----------------
 
-Three method are statically given :
+Three statics methods provides the scan process :
+```php
+<?php
  Scanner::collect_and_return($url, $test_externals, $with_subpath, $with_sub_domain, $max_depth)
  Scanner::collect_and_save($url, $file, $test_externals, $with_subpath, $with_sub_domain, $max_depth)
  Scanner::get_status($url)
+```
 
-As the scan process take time, the simpliest way is to collect and save the result in a serialized file. This file could be simply unserialized later to permit functionnals analysis.
+As the scan take time, the simpliest way is to collect and save the result in a serialized file. This file could be simply unserialized later to permit functionnals analysis.
 
 The serialized file contains the "Resources" object created in the scan process.
 
@@ -42,16 +46,14 @@ Internal
 --------
 The scan is a loop which crawle html files, identify links (for now just links in an anchor tag), analysed and sorted those: external links will analized by simple curls request, internals resources crawle by Goutte.
 
-The library is design to be simple and speed. Analysed of silex take by example 4 seconds for 150 urls (68 crawled resources and 82 curled links).
-
 Futur
 -----
 If the libs interessed some peoples :
 
-*Integration of symfony command component
-*Separation in file for each class
-*Better composer/packagist integration
-*Compilation as a phar
-*Utilisation of child class for the storage class resources/resource/url
-*Add link in script, header, css files
-*Add other controls (w3c compliance for css/html)
+ - Integration of symfony command component
+ - Separation in file for each class
+ - Better composer/packagist integration
+ - Compilation as a phar
+ - Utilisation of child class for the storage class resources/resource/url
+ - Add link in script, header, css files
+ - Add other controls (w3c compliance for css/html)
