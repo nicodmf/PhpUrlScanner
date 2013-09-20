@@ -1,6 +1,6 @@
 {
     "name": "alinea/scanner",
     "require": {
-        "fabpot/goutte": "1.0.x*"
+        "fabpot/goutte": "1.0.*"
     }
 }
