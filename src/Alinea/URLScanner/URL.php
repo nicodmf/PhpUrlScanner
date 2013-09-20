@@ -9,55 +9,113 @@ use Exception;
 
 class URL
 {
-    public $scheme;
-    public $domain;
-    public $host;
-    public $query;
-    public $path;
-    public $file;
+    // var : initial state //
+
+    /**
+     * @var string
+    **/
+    protected $url_str;
+
+    /**
+     * @var self
+    **/
+    protected $referer;
+
+    /**
+     * @var boolean
+    **/
+    protected $is_booted = false;
+
+    // var : helper //
+
+    /**
+     * @var LoggerInterface
+    **/
+    protected $logger;
+
+    // var : parsed and sanitized URL parts //
+
+    protected $scheme;
+    protected $domain;
+    protected $host;
+    protected $query;
+    protected $path;
+    protected $file;
+
+    // public //
+
+    public function __construct($url_str, self $referer = null)
+    {
+        $this->url_str = $url_str;
+        $this->referer = $referer;
+    }
+
+    /**
+     * Allow read-only access to fields.
+    **/
+    public function __get($name)
+    {
+        if (! $this->is_booted) {
+            $this->boot();
+        }
+        if (isset($this->{$name})) {
+            return $this->{$name};
+        }
+        throw new Exception('Unknown property "' . $name . '" in ' . get_called_class() . ' class');
+    }
 
     public function __toString()
     {
         return print_r($this, true);
     }
 
+    // public : get as string //
+
     public function long()
     {
-        return
-            $this->scheme . '://'.
-            $this->host .
-            $this->path. (substr($this->path,-1) !== '/' && isset($this->file) ? '/' : '') .
-            $this->file .
-            (isset($this->query) ? '?' . $this->query : '');
+        return implode('', [
+            $this->scheme,
+            '://',
+            $this->host,
+            $this->short(),
+        ]);
     }
 
     public function short()
     {
-        return
-            $this->path. (substr($this->path,-1) !== '/' && isset($this->file) ? '/' : '') .
-            $this->file .
-            (isset($this->query) ? '?' . $this->query : '');
+        return implode('', [
+            $this->path,
+            substr($this->path, -1) !== '/' && isset($this->file)
+                ? '/'
+                : '',
+            $this->file,
+            isset($this->query)
+                ? '?' . $this->query
+                : '',
+        ]);
     }
 
-    public function __construct($url_str, URL $referer = null)
+    // protected //
+
+    protected function boot()
     {
-        LogDebug::add($url_str, 'url_creation');
-        $url = new ArrayObject(parse_url($url_str), ArrayObject::ARRAY_AS_PROPS);
+        LogDebug::add($this->url_str, 'url_creation');
+        $url = new ArrayObject(parse_url($this->url_str), ArrayObject::ARRAY_AS_PROPS);
         LogDebug::add($url, 'url_creation');
         if (isset($url->scheme)) {
             $this->scheme = $url->scheme;
-        } elseif (isset($referer)) {
-            $this->scheme = $referer->scheme;
+        } elseif ($this->referer) {
+            $this->scheme = $this->referer->scheme;
         } else {
-            throw new Exception('The url "' . $url_str . '" should have a scheme, or a referer "' . $referer . '" with a scheme');
+            throw new Exception('The url "' . $this->url_str . '" should have a scheme, or a referer "' . $this->referer . '" with a scheme');
         }
 
         if (isset($url->host)) {
             $this->host = $url->host;
-        } elseif (isset($referer)) {
-            $this->host = $referer->host;
+        } elseif ($this->referer) {
+            $this->host = $this->referer->host;
         } else {
-            throw new Exception('The url >"' . $url_str . '" should have a host, or a referer "' . $referer . '" with a host');
+            throw new Exception('The url >"' . $this->url_str . '" should have a host, or a referer "' . $this->referer . '" with a host');
         }
 
         $this->domain = preg_replace('#.*\.([\w-_]*\.[\w-_]*)$#', '$1', $this->host);
@@ -85,11 +143,11 @@ class URL
         $path = str_replace($this->file, '', $path);
         LogDebug::add('path: ' . $path, 'url_creation');
 
-        if ($referer != null && $referer->host != $this->host) {
-            $referer = null;
+        if ($this->referer != null && $this->referer->host != $this->host) {
+            $this->referer = null;
         }
 
-        if ($referer == null) {
+        if ($this->referer == null) {
             if (strlen($path) != 0 && $path[0] !== '/') {
                 $path = '/' . $path;
             } elseif (strlen($path)==0) {
@@ -97,22 +155,24 @@ class URL
             }
         } else {
             if (strlen($path) != 0 && $path[0] !== '/') {
-                $path = $referer->path . '/' . $path;
+                $path = $this->referer->path . '/' . $path;
             } elseif (strlen($path) == 0) {
-                $path = $referer->path;
+                $path = $this->referer->path;
             }
         }
         LogDebug::add('path before clean_relative: ' . $path, 'url_creation');
         $path = $this->clean_relative($path);
         $this->path = str_replace('//', '/', $path);
         LogDebug::add('path after clean_relative: ' . $this->path, 'url_creation');
+
+        $this->is_booted = true;
     }
 
-    private function clean_relative($path)
+    protected function clean_relative($path)
     {
         $a = explode('/', $path);
         $la = count($a);
-        for ($i = 0; $i < $la; $i++){
+        for ($i = 0; $i < $la; $i++) {
             switch ($a[$i]) {
                 case '.':
                     unset($a[$i]);
