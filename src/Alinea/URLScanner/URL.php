@@ -1,4 +1,7 @@
 <?php
+/**
+ * Please refer to uri-bnf.txt to see BNF for a grammar parsing URIs.
+**/
 namespace Alinea\URLScanner;
 
 use ArrayObject;
