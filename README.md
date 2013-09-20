@@ -34,12 +34,10 @@ The package can be also installed as a set of classes in case you would like to 
 
 Usage
 -----
-Call the
-
-The class can be simply use by typing in the command line :
+Call the scanner by typing in the command line:
 
 ```
-$ php scanner 'url' [ [url2] [url2] ... [url3] ]
+$ php scanner.php 'url' [ [url2] [url3] ... [urlN] ]
 ```
 
 Simple tests
