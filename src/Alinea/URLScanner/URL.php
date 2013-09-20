@@ -6,8 +6,10 @@ namespace Alinea\URLScanner;
 
 use ArrayObject;
 use Exception;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 
-class URL
+class URL implements LoggerAwareInterface
 {
     // var : initial state //
 
@@ -69,10 +71,23 @@ class URL
         return print_r($this, true);
     }
 
+    /**
+     * Get an instance of logger to write logs to.
+     *
+     * Original logger wrote to 'url_creation' file.
+    **/
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     // public : get as string //
 
     public function long()
     {
+        if (! $this->is_booted) {
+            $this->boot();
+        }
         return implode('', [
             $this->scheme,
             '://',
@@ -83,6 +98,9 @@ class URL
 
     public function short()
     {
+        if (! $this->is_booted) {
+            $this->boot();
+        }
         return implode('', [
             $this->path,
             substr($this->path, -1) !== '/' && isset($this->file)
@@ -99,15 +117,22 @@ class URL
 
     protected function boot()
     {
-        LogDebug::add($this->url_str, 'url_creation');
+        if ($this->is_booted) {
+            return;
+        }
+
+        $this->log($this->url_str);
         $url = new ArrayObject(parse_url($this->url_str), ArrayObject::ARRAY_AS_PROPS);
-        LogDebug::add($url, 'url_creation');
+        $this->log($url);
         if (isset($url->scheme)) {
             $this->scheme = $url->scheme;
         } elseif ($this->referer) {
             $this->scheme = $this->referer->scheme;
         } else {
-            throw new Exception('The url "' . $this->url_str . '" should have a scheme, or a referer "' . $this->referer . '" with a scheme');
+            throw new Exception(
+                'The url "' . $this->url_str . '" should have a scheme, ' .
+                'or a referer "' . $this->referer . '" with a scheme'
+            );
         }
 
         if (isset($url->host)) {
@@ -115,7 +140,10 @@ class URL
         } elseif ($this->referer) {
             $this->host = $this->referer->host;
         } else {
-            throw new Exception('The url >"' . $this->url_str . '" should have a host, or a referer "' . $this->referer . '" with a host');
+            throw new Exception(
+                'The url "' . $this->url_str . '" should have a host, ' .
+                'or a referer "' . $this->referer . '" with a host'
+            );
         }
 
         $this->domain = preg_replace('#.*\.([\w-_]*\.[\w-_]*)$#', '$1', $this->host);
@@ -123,7 +151,7 @@ class URL
         $this->query = isset($url->query) ? $url->query : null;
         $path = isset($url->path) ? $url->path : null;
 
-        LogDebug::add($this, 'url_creation');
+        $this->log($this);
 
         /* set file */
         $matches = null;
@@ -136,12 +164,12 @@ class URL
             $this->file = null;
         }
 
-        LogDebug::add('file: ' . $this->file, 'url_creation');
+        $this->log('file: ' . $this->file);
 
         /* set path */
-        LogDebug::add('path: ' . $path, 'url_creation');
+        $this->log('path: ' . $path);
         $path = str_replace($this->file, '', $path);
-        LogDebug::add('path: ' . $path, 'url_creation');
+        $this->log('path: ' . $path);
 
         if ($this->referer != null && $this->referer->host != $this->host) {
             $this->referer = null;
@@ -160,10 +188,10 @@ class URL
                 $path = $this->referer->path;
             }
         }
-        LogDebug::add('path before clean_relative: ' . $path, 'url_creation');
+        $this->log('path before clean_relative: ' . $path);
         $path = $this->clean_relative($path);
         $this->path = str_replace('//', '/', $path);
-        LogDebug::add('path after clean_relative: ' . $this->path, 'url_creation');
+        $this->log('path after clean_relative: ' . $this->path);
 
         $this->is_booted = true;
     }
@@ -199,5 +227,13 @@ class URL
         }
         $path = $path == '' ? '/' : $path;
         return $path;
+    }
+
+    protected function log($message)
+    {
+        if (! $this->logger) {
+            return;
+        }
+        $this->logger->info($message);
     }
 }
