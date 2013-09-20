@@ -1,125 +1,7 @@
 <?php
-/* URI BNF Rules
-
-RFC 1738            Uniform Resource Locators (URL)        December 1994
-Berners-Lee, Masinter & McCahill                               [Page 17-19]
-
-genericurl     = scheme ":" schemepart
-; Specific predefined schemes are defined here; new schemes
-; may be registered with IANA
-url            = httpurl | ftpurl | newsurl |
-                 nntpurl | telneturl | gopherurl |
-                 waisurl | mailtourl | fileurl |
-                 prosperourl | otherurl
-
-; new schemes follow the general syntax
-otherurl       = genericurl
-
-; the scheme is in lower case; interpreters should use case-ignore
-scheme         = 1*[ lowalpha | digit | "+" | "-" | "." ]
-schemepart     = *xchar | ip-schemepart
-
-; URL schemeparts for ip based protocols:
-ip-schemepart  = "//" login [ "/" urlpath ]
-login          = [ user [ ":" password ] "@" ] hostport
-hostport       = host [ ":" port ]
-host           = hostname | hostnumber
-hostname       = *[ domainlabel "." ] toplabel
-domainlabel    = alphadigit | alphadigit *[ alphadigit | "-" ] alphadigit
-toplabel       = alpha | alpha *[ alphadigit | "-" ] alphadigit
-alphadigit     = alpha | digit
-hostnumber     = digits "." digits "." digits "." digits
-port           = digits
-user           = *[ uchar | ";" | "?" | "&" | "=" ]
-password       = *[ uchar | ";" | "?" | "&" | "=" ]
-urlpath        = *xchar    ; depends on protocol see section 3.1
-
-; The predefined schemes:
-; FTP (see also RFC959)
-ftpurl         = "ftp://" login [ "/" fpath [ ";type=" ftptype ]]
-fpath          = fsegment *[ "/" fsegment ]
-fsegment       = *[ uchar | "?" | ":" | "@" | "&" | "=" ]
-ftptype        = "A" | "I" | "D" | "a" | "i" | "d"
-
-; FILE
-fileurl        = "file://" [ host | "localhost" ] "/" fpath
-
-; HTTP
-httpurl        = "http://" hostport [ "/" hpath [ "?" search ]]
-hpath          = hsegment *[ "/" hsegment ]
-hsegment       = *[ uchar | ";" | ":" | "@" | "&" | "=" ]
-search         = *[ uchar | ";" | ":" | "@" | "&" | "=" ]
-
-; GOPHER (see also RFC1436)
-gopherurl      = "gopher://" hostport [ / [ gtype [ selector
-                 [ "%09" search [ "%09" gopher+_string ] ] ] ] ]
-gtype          = xchar
-selector       = *xchar
-gopher+_string = *xchar
-
-; MAILTO (see also RFC822)
-mailtourl      = "mailto:" encoded822addr
-encoded822addr = 1*xchar               ; further defined in RFC822
-
-; NEWS (see also RFC1036)
-newsurl        = "news:" grouppart
-grouppart      = "*" | group | article
-group          = alpha *[ alpha | digit | "-" | "." | "+" | "_" ]
-article        = 1*[ uchar | ";" | "/" | "?" | ":" | "&" | "=" ] "@" host
-
-; NNTP (see also RFC977)
-nntpurl        = "nntp://" hostport "/" group [ "/" digits ]
-
-; TELNET
-telneturl      = "telnet://" login [ "/" ]
-
-; WAIS (see also RFC1625)
-waisurl        = waisdatabase | waisindex | waisdoc
-waisdatabase   = "wais://" hostport "/" database
-waisindex      = "wais://" hostport "/" database "?" search
-waisdoc        = "wais://" hostport "/" database "/" wtype "/" wpath
-database       = *uchar
-wtype          = *uchar
-wpath          = *uchar
-
-; PROSPERO
-prosperourl    = "prospero://" hostport "/" ppath *[ fieldspec ]
-ppath          = psegment *[ "/" psegment ]
-psegment       = *[ uchar | "?" | ":" | "@" | "&" | "=" ]
-fieldspec      = ";" fieldname "=" fieldvalue
-fieldname      = *[ uchar | "?" | ":" | "@" | "&" ]
-fieldvalue     = *[ uchar | "?" | ":" | "@" | "&" ]
-
-; Miscellaneous definitions
-lowalpha       = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" |
-                 "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" |
-                 "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" |
-                 "y" | "z"
-hialpha        = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" |
-                 "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" |
-                 "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-
-alpha          = lowalpha | hialpha
-digit          = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" |
-                 "8" | "9"
-safe           = "$" | "-" | "_" | "." | "+"
-extra          = "!" | "*" | "'" | "(" | ")" | ","
-national       = "{" | "}" | "|" | "\" | "^" | "~" | "[" | "]" | "`"
-punctuation    = "<" | ">" | "#" | "%" | <">
-
-
-reserved       = ";" | "/" | "?" | ":" | "@" | "&" | "="
-hex            = digit | "A" | "B" | "C" | "D" | "E" | "F" |
-                 "a" | "b" | "c" | "d" | "e" | "f"
-escape         = "%" hex hex
-
-unreserved     = alpha | digit | safe | extra
-uchar          = unreserved | escape
-xchar          = unreserved | reserved | escape
-digits         = 1*digit
-
-*/
-
+/**
+ * Please refer to uri-bnf.txt to see BNF for a grammar parsing URIs.
+**/
 namespace Alinea\URLScanner;
 
 require_once __DIR__ . '/goutte.phar';
@@ -136,8 +18,8 @@ class LogDebug{
 	private $dir = "logs/";
 	private $domain_placement = 20;
 	static $instance = null;
-	
-	
+
+
 	private function __construct(){
 		//throw new Exception( "preg".preg_replace("#\\\#", "/", __NAMESPACE__ ));
 		$this->dir = __DIR__ ."/".$this->dir. preg_replace("#\\\#", "/", __NAMESPACE__ ) . "/";
@@ -147,22 +29,22 @@ class LogDebug{
 		self::get()->level = 0;
 		self::get()->output = false;
 		self::get()->log = false;
-		self::get()->debug = false;		
+		self::get()->debug = false;
 	}
 	static public function add($var, $domain="main", $level=1){
-		self::get()->make($var, $domain, $level);		
-	}	
+		self::get()->make($var, $domain, $level);
+	}
 	static private function get(){
 		if(self::$instance==null)return self::$instance = new LogDebug();
 		return self::$instance;
 	}
-	private function make($var, $domain, $level){		
+	private function make($var, $domain, $level){
 		if($this->level<$level) return;
-		if( !$this->debug && !$this->log && !$this->output)return;	
+		if( !$this->debug && !$this->log && !$this->output)return;
 		//$head = sprint_f($this->model, $domain, 0, strlen($domain) );
 		if(!is_string($var))$var = print_r($var, true);
 		$output = $stdout = "";
-		
+
 		if($this->debug){
 			foreach(preg_split("/\n/", $var) as $line){
 				printf("[ %-{$this->domain_placement}s%s ] * %s\n", $domain, date("c"), $line);
@@ -179,26 +61,26 @@ class URL{
 	public $query;
 	public $path;
 	public $file;
-	
+
 	public function __toString(){
 		return 	print_r($this, true);
-	}	
+	}
 	public function long(){
-		return 	
+		return
 			$this->scheme . "://".
 			$this->host .
 			$this->path. (substr($this->path,-1)!=="/" && isset($this->file) ? "/" : "") .
 			$this->file .
 			(isset($this->query) ? "?" .$this->query : "" );
 	}
-	
+
 	public function short(){
-		return 	
+		return
 			$this->path. (substr($this->path,-1)!=="/" && isset($this->file) ? "/" : "") .
 			$this->file .
 			(isset($this->query) ? "?" .$this->query : "" );
 	}
-	
+
 	public function __construct($url_str, URL $referer=null){
 		LogDebug::add($url_str, "url_creation");
 		$url = new ArrayObject(parse_url($url_str), ArrayObject::ARRAY_AS_PROPS);
@@ -216,12 +98,12 @@ class URL{
 			$this->host = $referer->host;
 		else
 			throw new \Exception("The url >$url_str< should have a host, or a referer >$referer< with a host");
-		
+
 		$this->domain = preg_replace("#.*\.([[:alnum:]-_]*\.[[:alnum:]-_]*)$#", "$1", $this->host);
-			
-		$this->query = isset($url->query) ? $url->query : null;		
+
+		$this->query = isset($url->query) ? $url->query : null;
 		$path = isset($url->path) ? $url->path : null;
-		
+
 		LogDebug::add($this, "url_creation");
 		/* set file */
 		$matches = null;
@@ -233,16 +115,16 @@ class URL{
 		}else{
 			$this->file = null;
 		}
-		
+
 		LogDebug::add("file: {$this->file}", "url_creation");
 		/* set path */
 		LogDebug::add("path: {$path}", "url_creation");
-		$path = preg_replace("#".$this->file."#", "", $path);	
+		$path = preg_replace("#".$this->file."#", "", $path);
 		LogDebug::add("path: {$path}", "url_creation");
-		
+
 		if($referer!=null && $referer->host!=$this->host)
 			$referer=null;
-	
+
 		if($referer==null){
 			if(strlen($path)!=0 && $path[0]!=="/" )
 				$path="/".$path;
@@ -267,7 +149,7 @@ class URL{
 				case ".": unset($a[$i]); break;
 				case "..": $find = false;	unset($a[$i]);
 					for($j=$i-1; !$find; $j--){
-						if(isset($a[$j])){ unset($a[$j]); $find=true; }						
+						if(isset($a[$j])){ unset($a[$j]); $find=true; }
 					}
 					break;
 			}
@@ -301,13 +183,13 @@ class Resource{
 	public function getUrl($type="string"){
 		switch($type){
 			case "o":
-			case "obj": 
+			case "obj":
 			case "object": return $this->url;
 			case "string": return $this->url->long();
 			default : $this->url->getRepresentation($type);
 		}
 	}
-	
+
 	public function getReferers(){return $this->referers;}
 	public function getLinks(){return $this->links;}
 	public function hasStatus(){return isset($this->status);}
@@ -319,27 +201,27 @@ class Resource{
 		$this->referers[] = $referer;
 		$referer->addLink($this);
 	}
-	
+
 	public function setDependances($root){
 		LogDebug::add("setDependances", "dependances");
 		LogDebug::add("- This URL : ".$this->url, "dependances");
 		LogDebug::add("- Root : ".$root->url, "dependances");
-		$this->domain_dependant = $this->host_dependant = $this->path_dependant = false;		
+		$this->domain_dependant = $this->host_dependant = $this->path_dependant = false;
 		if($root->url->domain == $this->url->domain) $this->domain_dependant = true;
 		if($root->url->host == $this->url->host) $this->host_dependant = true;
-		if(preg_match("#".addcslashes($root->url->path, "()\\/?.*[]{}+$\'")."#", $this->url->path)) $this->path_dependant 
-= true;		
+		if(preg_match("#".addcslashes($root->url->path, "()\\/?.*[]{}+$\'")."#", $this->url->path)) $this->path_dependant
+= true;
 		LogDebug::add("Result", "dependances");
 		LogDebug::add("    host   : ".$this->host_dependant, "dependances");
 		LogDebug::add("    domain : ".$this->domain_dependant, "dependances");
 		LogDebug::add("    path   : ".$this->path_dependant, "dependances");
-		LogDebug::add("/setDependances", "dependances");		
+		LogDebug::add("/setDependances", "dependances");
 	}
 
 	public function __toString(){
 		return print_r($this, true);
 	}
-	
+
 	private function addLink($link){
 		$this->links[$link->getUrl()] = $link;
 	}
@@ -351,7 +233,7 @@ class Resources implements \Iterator, \ArrayAccess{
 	protected $resources;
 	public $documents;
 	public $links;
-	
+
 	public function addUrl($url){
 		LogDebug::add("URL      : ".$url, "addUrl");
 		$resource = new Resource($url);
@@ -367,12 +249,12 @@ class Resources implements \Iterator, \ArrayAccess{
 				LogDebug::add("- exists", "add");
 				LogDebug::add("- referer added : ".$referer->getUrl(), "add");
 				$this->resources[$url]->addReferer($referer);
-				/* TODO : Problem with updated resources, 
+				/* TODO : Problem with updated resources,
 				          the tree should be updated too : investigation
 						  and tests needed
 				if($this->resources[$url]->depth > $referer->depth+1){
 					$this->resources[$url]->depth;
-				
+
 				}*/
 			}else{
 				throw new \Exception("Adding an exiting resource without referer isn't allowed");
@@ -399,21 +281,21 @@ class Resources implements \Iterator, \ArrayAccess{
 		LogDebug::add("set root : ".$root->getUrl(), "init");
 		$this->root = $root;
 	}
-	
-	
-	public function first(){reset($this->resources); return $this->current();}	
-	/* ArrayAccess Implementation */	
+
+
+	public function first(){reset($this->resources); return $this->current();}
+	/* ArrayAccess Implementation */
 	public function offsetExists($key){return isset($this->resources[$key]);}
 	public function offsetGet($key){return $this->resources[$key];}
 	public function offsetSet($key, $value){throw new \Exception("Documents souldn't be write");}
-	public function offsetUnset($key){throw new \Exception("Documents souldn't be write");}	
+	public function offsetUnset($key){throw new \Exception("Documents souldn't be write");}
 
-	/* Iterator Implementations */	
+	/* Iterator Implementations */
 	public function current(){return current($this->resources);}
 	public function key(){return key($this->resources);}
 	public function next(){next($this->resources);}
 	public function rewind(){reset($this->resources);}
-	public function valid(){return isset($this->resources[$this->key()]);}	
+	public function valid(){return isset($this->resources[$this->key()]);}
 }
 class Scanner{
 
@@ -424,13 +306,13 @@ class Scanner{
 	protected $should_be_host_dependant;
 	protected $should_be_domain_dependant;
 	protected $should_be_path_dependant;
-	protected $should_test_externals;	
+	protected $should_test_externals;
 	protected $should_follow_depth;
 	protected $max_depth;
 
 	private $toTouch = array();
-	
-	public function __construct($str_url, $test_externals=true, $with_subpath=false, $with_sub_domain=false, $max_depth=false){		
+
+	public function __construct($str_url, $test_externals=true, $with_subpath=false, $with_sub_domain=false, $max_depth=false){
 		if($with_sub_domain){
 			$this->should_be_host_dependant = false;
 			$this->should_be_domain_dependant = true;
@@ -444,13 +326,13 @@ class Scanner{
 		}
 		$this->should_be_path_dependant = ! $with_subpath;
 		$this->should_test_externals = $test_externals;
-		
+
 		$this->resources = new Resources();
 		$this->resources->add(new Resource($str_url));
 	}
-	
+
 	public function save_resources_as_serialized_string($file){
-		file_put_contents($file, serialize($this->resources));		
+		file_put_contents($file, serialize($this->resources));
 		LogDebug::add("# File saved to $file\n".
 			"#  - This is a serialize object Alinea\URLScanner\Resources\n".
 			"#  - If you want use this object in another class\n".
@@ -471,14 +353,14 @@ class Scanner{
 		$scanner->collect();
 		$scanner->save_resources_as_serialized_string($file);
 	}
-	
+
 	static public function get_status($url){
 		LogDebug::silent();
 		$scanner = new Scanner($url, true, false, false, -1);
 		$scanner->crawle_all();
 		return $scanner->resources->first()->getStatus();
 	}
-	
+
 	public function display_result(){
 		$documents_counts = $links_counts = array();
 		$count_links = $count_documents = null;
@@ -497,7 +379,7 @@ class Scanner{
 					:1;
 			}
 		}
-		
+
 		ksort($documents_counts);
 		ksort($links_counts);
 
@@ -516,7 +398,7 @@ class Scanner{
 		}
 		LogDebug::add("$res#");
 		return $res;
-		
+
 	}
 
 	private function should_be_crawled($resource){
@@ -528,34 +410,34 @@ class Scanner{
 		if( ! $this->is_curlable($resource)){
 			LogDebug::add(" - will not crawled, it not curlable", "should_be_crawled");
 			return false;
-		}		
+		}
 		if( ! $this->is_in_depth($resource)){
 			LogDebug::add(" - will not crawled, it not curlable", "should_be_crawled");
 			return false;
-		}		
+		}
 		LogDebug::add(" + will crawled, it is internal and curlable", "should_be_crawled");
 		return true;
 	}
-	
+
 	private function is_curlable($resource){
 		if( ! in_array($resource->getUrl("o")->scheme, array("http","https")))
 			return false;
 		return true;
 	}
-	
-	private function is_external($resource){			
+
+	private function is_external($resource){
 		if($this->should_be_host_dependant)
-			if( ! $resource->host_dependant) return true;		
+			if( ! $resource->host_dependant) return true;
 		if($this->should_be_path_dependant)
 			if( ! $resource->path_dependant) return true;
 		if($this->should_be_domain_dependant)
-			if( ! $resource->domain_depandant) return true;		
-		return false;		
-	}	
+			if( ! $resource->domain_depandant) return true;
+		return false;
+	}
 
-	private function is_in_depth($resource){			
+	private function is_in_depth($resource){
 		if($this->should_follow_depth)
-			if( $resource->depth > $this->max_depth ) return false;		
+			if( $resource->depth > $this->max_depth ) return false;
 		return true;
 	}
 
@@ -595,11 +477,11 @@ class Scanner{
 			}
 		}catch(\Exception $e){
 			//print_r($e);
-			$resource->setStatus('GoutteException');//$e->getMessage());	
-			LogDebug::add("GoutteException Request ".$resource->getUrl());	
+			$resource->setStatus('GoutteException');//$e->getMessage());
+			LogDebug::add("GoutteException Request ".$resource->getUrl());
 		}
 	}
-	
+
 	private function is_valid_url($url){
 		LogDebug::add($url, "is_valid");
 		if($url=="" or $url==null or $url==false) return false;
@@ -620,7 +502,7 @@ class Scanner{
 			LogDebug::add("Href: $link", "is_valid");
 			if(!$this->is_valid_url($link)) { LogDebug::add("-", "is_valid"); continue;}
 			LogDebug::add("+", "is_valid");
-			$this->resources->add(new Resource($link, $referer), $referer);				
+			$this->resources->add(new Resource($link, $referer), $referer);
 		}
 	}
 	private function touch_externals(){
@@ -661,10 +543,10 @@ class Scanner{
 			LogDebug::add(curl_getinfo($ch[$k]), "curl");
 			$resource->setStatus($status);
 			$resource->analysed = true;
-			curl_multi_remove_handle($mh, $ch[$k]);			
+			curl_multi_remove_handle($mh, $ch[$k]);
 		}
 		curl_multi_close($mh);
-		$this->externals = array();		
+		$this->externals = array();
 	}
 }
 
