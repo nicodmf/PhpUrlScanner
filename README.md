@@ -16,7 +16,7 @@ Simple tests
 ------------
 
 ```
-wget https://github.com/fabpot/Goutte/blob/b966bcbd7220bc5cbfe0d323e22499aa022a6c75/goutte.phar && wget https://raw.github.com/nicodmf/PhpUrlScanner/master/scanner.php && php scanner.php http://getcomposer.org
+wget https://github.com/fabpot/Goutte/blob/b966bcbd7220bc5cbfe0d323e22499aa022a6c75/goutte.phar?raw=1 -O goutte.phar && wget https://raw.github.com/nicodmf/PhpUrlScanner/master/scanner.php && php scanner.php http://getcomposer.org
 ```
 
 In this example, the 404 are normal as the pages demand an identification and refuse simple connection without following another url.
