@@ -1,6 +1,12 @@
 {
     "name": "alinea/scanner",
     "require": {
-        "fabpot/goutte": "1.0.x*"
+        "fabpot/goutte" : "1.0.*",
+        "psr/log"       : "1.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Alinea" : "src/"
+        }
     }
 }
